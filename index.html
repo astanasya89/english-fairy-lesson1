@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Урок английского: Волшебная Школа</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&display=swap');
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: 'Comfortaa', cursive, sans-serif;
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            background-image: radial-gradient(circle at 10% 20%, rgba(255, 182, 193, 0.4) 0%, transparent 20%), radial-gradient(circle at 90% 80%, rgba(173, 216, 230, 0.4) 0%, transparent 20%);
+            min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px; overflow-x: hidden;
+        }
+        
+        .app-container {
+            width: 100%; max-width: 450px; background: #ffffff; border-radius: 40px; padding: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1), 0 0 0 10px rgba(255, 255, 255, 0.5);
+            text-align: center; position: relative; border: 3px dashed #ffb6c1;
+            overflow: hidden; 
+            /* Задаем минимальную высоту, чтобы карточка не сжималась, если контента мало */
+            min-height: 550px; 
+            display: flex; flex-direction: column;
+        }
+
+        /* --- СТАРТОВЫЙ ЭКРАН --- */
+        .start-screen {
+            /* Занимает все свободное пространство внутри карточки */
+            flex: 1; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            position: relative; z-index: 20;
+            border-radius: 30px;
+            overflow: hidden;
+        }
+        
+        /* Фоновая картинка стартового экрана */
+        .start-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; z-index: -1;
+        }
+        
+        /* Плашка для текста, чтобы он читался на любом фоне */
+        .start-content {
+            background: rgba(255, 255, 255, 0.85); padding: 30px 25px; border-radius: 30px;
+            border: 2px dashed #ffb6c1; display: flex; flex-direction: column; align-items: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); backdrop-filter: blur(5px); 
+            width: 80%; max-width: 300px;
+        }
+
+        .start-content h2 { color: #d81b60; font-size: 22px; margin-bottom: 20px; text-shadow: 1px 1px 0 #fff; }
+        
+        .start-btn {
+            background: #ffb6c1; color: #fff; font-size: 18px; padding: 15px 30px;
+            border-radius: 50px; border: none; font-family: 'Comfortaa', cursive; font-weight: 700;
+            box-shadow: 0 5px 0 #e68a9e; cursor: pointer; animation: pulse 2s infinite;
+            width: 100%;
+        }
+        .start-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #e68a9e; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        /* --- ИГРОВОЙ ЭКРАН --- */
+        .game-ui {
+            display: none; 
+            flex-direction: column;
+            flex: 1; /* Занимает всю высоту */
+        }
+
+        .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        h1 { color: #ff69b4; font-size: 18px; text-shadow: 1px 1px 0px #fff, 2px 2px 0px rgba(255, 182, 193, 0.5); }
+        .score { background: #fff9c4; color: #f57f17; padding: 5px 10px; border-radius: 20px; font-weight: bold; font-size: 14px; border: 2px solid #ffd54f; }
+
+        /* Верхняя зона: Аудио */
+        .audio-section {
+            background: #f0f8ff; border-radius: 25px; padding: 15px; margin-bottom: 20px;
+            border: 3px solid #e0f7fa; display: flex; justify-content: center; align-items: center;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .listen-btn { 
+            background: #ffb6c1; color: #fff; font-size: 16px; padding: 10px 20px; border-radius: 50px; border: none;
+            font-family: 'Comfortaa', cursive; font-weight: 700; cursor: pointer; box-shadow: 0 4px 0 #e68a9e;
+            display: flex; align-items: center; gap: 8px; transition: all 0.1s;
+        }
+        .listen-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #e68a9e; }
+
+        /* Нижняя зона: Сетка с картинками */
+        .options-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+            margin-top: auto; /* Прижимает к низу, если есть свободное место */
+        }
+
+        .img-option {
+            background: #fff; border: 3px solid #e0f7fa; border-radius: 20px; overflow: hidden;
+            cursor: pointer; aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s ease; position: relative; box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        
+        .img-option img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+        .img-option:active { transform: scale(0.95); }
+
+        /* Плашка со словом ПОВЕРХ картинки */
+        .word-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.4s ease; pointer-events: none;
+            backdrop-filter: blur(2px);
+        }
+        .word-overlay span {
+            color: #d81b60; font-size: 24px; font-weight: bold;
+            background: #fff9c4; padding: 5px 15px; border-radius: 15px;
+            border: 2px dashed #ffd54f; transform: scale(0.8); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .img-option.show-word .word-overlay { opacity: 1; }
+        .img-option.show-word .word-overlay span { transform: scale(1); }
+        
+        /* Анимации */
+        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(76, 175, 80, 0); } 100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); } }
+        .correct-flash { animation: pulse-green 1s; border-color: #4caf50 !important; }
+        
+        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-8px); } 50% { transform: translateX(8px); } 75% { transform: translateX(-8px); } 100% { transform: translateX(0); } }
+        .wrong-shake { animation: shake 0.4s; border-color: #f44336 !important; }
+
+        /* --- ФИНАЛЬНЫЙ ЭКРАН --- */
+        .finish-screen {
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.95); border-radius: 40px; z-index: 10;
+            padding: 20px; animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .finish-screen h2 {
+            color: #d81b60; font-size: 24px; margin-bottom: 15px; line-height: 1.3;
+            text-shadow: 1px 1px 0px #fff;
+        }
+        
+        .fairy-img { 
+            width: 200px; height: auto; max-height: 250px; object-fit: contain;
+            border-radius: 20px; filter: drop-shadow(0 10px 15px rgba(255, 105, 180, 0.3)); 
+            animation: float 3s ease-in-out infinite; margin-bottom: 15px;
+        }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+        
+        .restart-btn {
+            margin-top: 10px; background: #ffb6c1; color: #fff; font-size: 16px; padding: 12px 30px;
+            border-radius: 50px; border: none; font-family: 'Comfortaa', cursive; font-weight: 700;
+            box-shadow: 0 4px 0 #e68a9e; cursor: pointer;
+        }
+        .restart-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #e68a9e; }
+
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- СТАРТОВЫЙ ЭКРАН -->
+        <div class="start-screen" id="startScreen">
+            <!-- Ваша фоновая картинка -->
+            <img src="фон.jpg" alt="Фон" class="start-bg" onerror="this.style.display='none'; this.parentElement.style.background='#ffe4e1';">
+            
+            <div class="start-content">
+                <h2>✨ Волшебный урок ✨</h2>
+                <button class="start-btn" onclick="startGame()">Начать 🚀</button>
+            </div>
+        </div>
+
+        <!-- Основной интерфейс -->
+        <div class="game-ui" id="gameUI">
+            <div class="header-row">
+                <h1>✨ Волшебный урок ✨</h1>
+                <div class="score" id="scoreDisplay">⭐ 0 / 17</div>
+            </div>
+            
+            <div class="audio-section">
+                <button class="listen-btn" onclick="playSound()">🔊 Слушай слово еще раз</button>
+            </div>
+
+            <audio id="audioPlayer" src="" preload="auto"></audio>
+
+            <div class="options-grid" id="optionsGrid">
+                <div class="img-option" onclick="checkAnswer(0)">
+                    <img src="" alt="opt1">
+                    <div class="word-overlay"><span id="word0">???</span></div>
+                </div>
+                <div class="img-option" onclick="checkAnswer(1)">
+                    <img src="" alt="opt2">
+                    <div class="word-overlay"><span id="word1">???</span></div>
+                </div>
+                <div class="img-option" onclick="checkAnswer(2)">
+                    <img src="" alt="opt3">
+                    <div class="word-overlay"><span id="word2">???</span></div>
+                </div>
+                <div class="img-option" onclick="checkAnswer(3)">
+                    <img src="" alt="opt4">
+                    <div class="word-overlay"><span id="word3">???</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Финальный экран -->
+        <div class="finish-screen" id="finishScreen">
+            <h2>Розовая фея,<br>ты большая умница!</h2>
+            <img src="розовая фея.jpg" alt="Розовая фея" class="fairy-img" onerror="this.style.display='none'; alert('Картинка не загрузилась. Убедитесь, что файл называется ровно так: розовая фея.jpg');">
+            <button class="restart-btn" onclick="restartGame()">Играть снова 🔄</button>
+        </div>
+
+    </div>
+
+    <script>
+        const allWords = [
+            { word: "Bad", image: "bad.jpg", audio: "bad.mp3" },
+            { word: "Boots", image: "boots.jpg", audio: "boots.mp3" },
+            { word: "Buy", image: "buy.jpg", audio: "buy.mp3" },
+            { word: "Donkey", image: "donkey.jpg", audio: "donkey.mp3" },
+            { word: "Funny", image: "funny.jpg", audio: "funny.mp3" },
+            { word: "Giraffe", image: "girrafe.jpg", audio: "giraffe.mp3" },
+            { word: "Good", image: "good.jpg", audio: "good.mp3" },
+            { word: "Honey", image: "honey.jpg", audio: "honey.mp3" },
+            { word: "Jacket", image: "jacket.jpg", audio: "jacket.mp3" },
+            { word: "Jumper", image: "jumper.jpg", audio: "jumper.mp3" },
+            { word: "Parrot", image: "parrot.jpg", audio: "parrot.mp3" },
+            { word: "Plane", image: "plane.jpg", audio: "plane.mp3" },
+            { word: "Rainbow", image: "rainbow.jpg", audio: "rainbow.mp3" },
+            { word: "Shorts", image: "shorts.jpg", audio: "shorts.mp3" },
+            { word: "Tasty", image: "tasty.jpg", audio: "tasty.mp3" },
+            { word: "Trousers", image: "trousers.jpg", audio: "trousers.mp3" },
+            { word: "Work", image: "work.jpg", audio: "work.mp3" }
+        ];
+
+        let currentRound = 0;
+        let score = 0;
+        let isPlaying = false;
+        let currentTargetWord = null;
+        let isFirstRound = true; 
+        
+        const audio = document.getElementById('audioPlayer');
+        const optionDivs = document.querySelectorAll('.img-option');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const finishScreen = document.getElementById('finishScreen');
+        const startScreen = document.getElementById('startScreen');
+        const gameUI = document.getElementById('gameUI');
+
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function startGame() {
+            startScreen.style.display = "none";
+            gameUI.style.display = "flex"; // Используем flex для правильного отображения
+            shuffle(allWords);
+            loadRound();
+        }
+
+        function loadRound() {
+            isPlaying = false;
+            
+            optionDivs.forEach(div => {
+                div.style.pointerEvents = "auto";
+                div.style.opacity = "1";
+                div.classList.remove('correct-flash', 'show-word');
+                div.style.borderColor = "#e0f7fa";
+            });
+
+            currentTargetWord = allWords[currentRound];
+            scoreDisplay.textContent = `⭐ ${score} / ${allWords.length}`;
+
+            audio.src = currentTargetWord.audio;
+            audio.load();
+
+            let wrongOptions = allWords.filter(w => w.word !== currentTargetWord.word);
+            wrongOptions = shuffle(wrongOptions).slice(0, 3); 
+            
+            let roundOptions = [currentTargetWord, ...wrongOptions];
+            roundOptions = shuffle(roundOptions); 
+
+            optionDivs.forEach((div, index) => {
+                const img = div.querySelector('img');
+                const span = div.querySelector('span');
+                img.src = roundOptions[index].image;
+                div.dataset.word = roundOptions[index].word;
+                span.textContent = roundOptions[index].word;
+            });
+
+            setTimeout(() => {
+                playSound();
+            }, isFirstRound ? 600 : 300); 
+            
+            isFirstRound = false;
+        }
+
+        function playSound() {
+            if (isPlaying) return;
+            isPlaying = true;
+            audio.currentTime = 0;
+            
+            let playPromise = audio.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Браузер заблокировал звук: ", error);
+                    isPlaying = false; 
+                });
+            }
+            audio.onended = () => { isPlaying = false; };
+        }
+
+        function checkAnswer(clickedIndex) {
+            const clickedDiv = optionDivs[clickedIndex];
+            
+            if (clickedDiv.style.pointerEvents === "none") return;
+
+            const isCorrect = clickedDiv.dataset.word === currentTargetWord.word;
+
+            if (isCorrect) {
+                clickedDiv.classList.add('correct-flash', 'show-word');
+                clickedDiv.style.borderColor = "#4caf50";
+                
+                optionDivs.forEach(div => {
+                    div.style.pointerEvents = "none";
+                    if (div !== clickedDiv) div.style.opacity = "0.4";
+                });
+
+                score++;
+                scoreDisplay.textContent = `⭐ ${score} / ${allWords.length}`;
+                
+                // АВТОМАТИЧЕСКИЙ ПЕРЕХОД ЧЕРЕЗ 2 СЕКУНДЫ
+                setTimeout(() => {
+                    if (currentRound < allWords.length - 1) {
+                        currentRound++;
+                        loadRound(); 
+                    } else {
+                        gameUI.style.display = "none";
+                        finishScreen.style.display = "flex";
+                    }
+                }, 2000); 
+
+            } else {
+                clickedDiv.classList.add('wrong-shake');
+                clickedDiv.style.borderColor = "#f44336";
+                setTimeout(() => {
+                    clickedDiv.classList.remove('wrong-shake');
+                    clickedDiv.style.borderColor = "#e0f7fa";
+                }, 400);
+            }
+        }
+
+        function restartGame() {
+            currentRound = 0;
+            score = 0;
+            isFirstRound = true; 
+            finishScreen.style.display = "none";
+            gameUI.style.display = "none";
+            startScreen.style.display = "flex"; 
+        }
+    </script>
+</body>
+</html>
